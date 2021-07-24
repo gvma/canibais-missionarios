@@ -23,16 +23,17 @@ def mutacao(novaPopulacao):
         ind_index = randint(0,len(novaPopulacao)-1)
         individual = novaPopulacao[ind_index]
         pos_chromosomes = randint(0,10)
-        if individual[pos_chromosomes].config['people'] =="canibal":
-            individual[pos_chromosomes].config['people'] = "missionario"
+        print(individual)
+        if individual.chromosomes[pos_chromosomes].config['people'] =="canibal":
+            individual.chromosomes[pos_chromosomes].config['people'] = "missionario"
         else:
-            individual[pos_chromosomes].config['people'] = "canibal"
+            individual.chromosomes[pos_chromosomes].config['people'] = "canibal"
 
 
 def cruzamentoParte2(pai,mae,novaPopulacao):
     part1 = randint(1,10)
-    individuo1 = pai.chromosomes[:part1] + mae.chromosomes[part1:]
-    individuo2 = mae.chromosomes[:part1] + pai.chromosomes[part1:]
+    individuo1 = Individual(pai.chromosomes[:part1] + mae.chromosomes[part1:])
+    individuo2 = Individual(mae.chromosomes[:part1] + pai.chromosomes[part1:])
     novaPopulacao.append(individuo1)
     novaPopulacao.append(individuo2)
 
@@ -95,7 +96,6 @@ def score(population):
     right_margin_canibals = 0
     #print("Right margin " + str(right_margin_canibals))
     right_margin_missionaries = 0
-    print(population[i].chromosomes)
     chromosomes = population[i].chromosomes
 
     for j in range(len(chromosomes)):
@@ -189,12 +189,19 @@ def score(population):
                          right_margin_missionaries, config, score)
       print("SCORE " + str(score))
     population[i].score = score
-  return score
 
 init_population()
 
 while True:
+    flag = False
     score(population)
+    for ind in population:
+        if ind.score == 11:
+            print(ind)
+            flag = True
+            break
+    if flag:
+        break
     newpopulation = cruzamentoParte1(population,[])
     mutacao(newpopulation)
     score(newpopulation)

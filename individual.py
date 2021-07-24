@@ -6,8 +6,9 @@ persons = ['canibal', 'missionario']
 class Individual:
 
   def __init__(self):
+    self.score = 0
     self.chromosomes = []
-    for i in range(50):
+    for i in range(11):
       # sorteando para ver quantas pessoas vao passar de uma margem para outra
       config = {
         'people': []

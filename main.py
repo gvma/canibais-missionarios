@@ -1,11 +1,15 @@
 # 3 canibais e 3 missionarios na mesma margem
+from chromosome import Chromosome
 from random import seed
 from random import *
 from individual import Individual
+from datetime import datetime
 
 population = []
 newpopulation = []
 score = 0
+
+seed(10)
 
 def selection():
     qualquerLista = population + newpopulation
@@ -17,19 +21,15 @@ def selection():
 
 def mutacao():
     population_mutation = 5
-
     for i in range(population_mutation):
+      if len(newpopulation) != 0:
         ind_index = randint(0,len(newpopulation)-1)
-        print("IND INDEX " + str(ind_index) + "TAMANHO " + str(ind_index))
         individual = newpopulation[ind_index]
         pos_chromosomes = 5
-        #print(individual.chromosomes[pos_chromosomes].config['people'])
         if individual.chromosomes[pos_chromosomes].config['people'][0] =="canibal":
-           # print("ENTREI AQUI CANIBAL ~~~~~~~~~~~~~~~~~~~~")
             individual.chromosomes[pos_chromosomes].config['people'][0] = "missionario"
         else:
             individual.chromosomes[pos_chromosomes].config['people'][0] = "canibal"
-            #print("ENTREI AQUI MISSIONARIO~~~~~~~~~~~~~~~~~~~~")
 
 
 def cruzamentoParte2(pai,mae):
@@ -48,154 +48,189 @@ def cruzamentoParte1():
                 mae = population[j]
                 cruzamentoParte2(pai,mae)
 
-def get_right_margin_people(position,left_margin_canibals, left_margin_missionaries, right_margin_canibals, right_margin_missionaries, config):
-  if config['people'][position] == "missionario":
-    left_margin_missionaries += 1
-    right_margin_missionaries -= 1
-    return left_margin_missionaries, right_margin_missionaries
-  elif config['people'][position] == "canibal":
-    left_margin_canibals += 1
-    right_margin_canibals -= 1
-    return left_margin_canibals, right_margin_canibals
-
-def get_left_margin_people(position,left_margin_canibals, left_margin_missionaries, right_margin_canibals, right_margin_missionaries, config):
-  if config['people'][position] == "missionario":
-    left_margin_missionaries -= 1
-    right_margin_missionaries += 1
-    return left_margin_missionaries, right_margin_missionaries
-  elif config['people'][position] == "canibal":
-    left_margin_canibals -= 1
-    right_margin_canibals += 1
-    return left_margin_canibals, right_margin_canibals
-
 def validate(left_margin_canibals, left_margin_missionaries, right_margin_canibals, right_margin_missionaries, score):
     if left_margin_canibals > left_margin_missionaries and left_margin_missionaries != 0:
-        score -= 1
+        return 2
     elif right_margin_canibals > right_margin_missionaries and right_margin_missionaries != 0:
-        score -= 1
+        return 2
     return score
 
 def init_population():
   for i in range(50):
     individual = Individual()
     population.append(individual)
-    #print(individual)
 
 def score(population):
   for i in range(len(population)):
-    score = 11
+    score = 3
     left_margin_canibals = 3
     left_margin_missionaries = 3
     right_margin_canibals = 0
     right_margin_missionaries = 0
     chromosomes = population[i].chromosomes
-
+    impossible = False
     for j in range(len(chromosomes)):
       config = chromosomes[j].config
-      #print(config)
-
-      if j%2 == 0:
+      if impossible or score == 1:
+        population[i].score = score
+        # print('Configuracao impossivel')
+        break
+      # print(config)
+      if j % 2 == 0:
         if config['people'][0] == 'missionario':
           if left_margin_missionaries == 0:
-              score -= 1
+            score = 1
+            impossible = True
           else:
-              left_margin_missionaries, right_margin_missionaries = get_left_margin_people(0,left_margin_canibals,
-                                                                                       left_margin_missionaries,
-                                                                                       right_margin_canibals,
-                                                                                       right_margin_missionaries,
-                                                                                       config)
-        if config['people'][0] == 'canibal':
+            right_margin_missionaries += 1
+            left_margin_missionaries -= 1
+        else:
+          if left_margin_canibals == 0:
+            score = 1
+            impossible = True
+          else:
+            right_margin_canibals += 1
+            left_margin_canibals -= 1
+        if config['number_of_people'] == 2:
+          if config['people'][1] == 'missionario':
+            if left_margin_missionaries == 0:
+              score = 1
+              impossible = True
+            else:
+              right_margin_missionaries += 1
+              left_margin_missionaries -= 1
+          else:
             if left_margin_canibals == 0:
-                score -= 1
+              score = 1
+              impossible = True
             else:
-                left_margin_canibals, right_margin_canibals = get_left_margin_people(0,left_margin_canibals,
-                                                                               left_margin_missionaries,
-                                                                               right_margin_canibals,
-                                                                               right_margin_missionaries,
-                                                                               config)
-
-      if j % 2 != 0:
-        if config['people'][0] == 'missionario':
-            if right_margin_missionaries == 0:
-                score -= 1
-            else:
-                left_margin_missionaries, right_margin_missionaries = get_right_margin_people(0, left_margin_canibals,
-                                                                                       left_margin_missionaries,
-                                                                                       right_margin_canibals,
-                                                                                       right_margin_missionaries,
-                                                                                       config)
-        if config['people'][0] == 'canibal':
-            if right_margin_canibals == 0:
-                score -= 1
-            else:
-                left_margin_canibals, right_margin_canibals = get_right_margin_people(0, left_margin_canibals,
-                                                                               left_margin_missionaries,
-                                                                               right_margin_canibals,
-                                                                               right_margin_missionaries, config)
-#===================================== do segundo ====================================================================
-      if config['number_of_people'] == 2:
-        if j % 2 == 0:
-          if config['people'][0] == 'missionario':
-              if left_margin_missionaries == 0:
-                  score -= 1
-              else:
-                left_margin_missionaries, right_margin_missionaries = get_left_margin_people(1, left_margin_canibals,
-                                                                                         left_margin_missionaries,
-                                                                                         right_margin_canibals,
-                                                                                         right_margin_missionaries,
-                                                                                         config)
-          if config['people'][0] == 'canibal':
-              if left_margin_canibals == 0:
-                  score -= 1
-              else:
-                left_margin_canibals, right_margin_canibals = get_left_margin_people(1, left_margin_canibals,
-                                                                                 left_margin_missionaries,
-                                                                                 right_margin_canibals,
-                                                                                 right_margin_missionaries,
-                                                                                 config)
-
-        if j % 2 != 0:
-          if config['people'][0] == 'missionario':
-              if right_margin_missionaries != 0:
-                  left_margin_missionaries, right_margin_missionaries = get_right_margin_people(1, left_margin_canibals,
-                                                                                        left_margin_missionaries,
-                                                                                        right_margin_canibals,
-                                                                                        right_margin_missionaries,
-                                                                                        config)
-              else:
-                    score -= 1
-
-          if config['people'][0] == 'canibal':
-              if right_margin_canibals == 0:
-                  score -= 1
-              else:
-                left_margin_canibals, right_margin_canibals = get_right_margin_people(1, left_margin_canibals,
-                                                                                  left_margin_missionaries,
-                                                                                  right_margin_canibals,
-                                                                                  right_margin_missionaries, config)
-
-        score = validate(left_margin_canibals, left_margin_missionaries, right_margin_canibals,
-                         right_margin_missionaries, score)
+              right_margin_canibals += 1
+              left_margin_canibals -= 1
       else:
-        score = validate(left_margin_canibals, left_margin_missionaries, right_margin_canibals,
-                         right_margin_missionaries, score)
+        if config['people'][0] == 'missionario':
+          if right_margin_missionaries == 0:
+            score = 1
+            impossible = True
+          else:
+            right_margin_missionaries -= 1
+            left_margin_missionaries += 1
+        else:
+          if right_margin_canibals == 0:
+            score = 1
+            impossible = True
+          else:
+            right_margin_canibals -= 1
+            left_margin_canibals += 1
+        if config['number_of_people'] == 2:
+          if config['people'][1] == 'missionario':
+            if right_margin_missionaries == 0:
+              score = 1
+              impossible = True
+            else:
+              right_margin_missionaries -= 1
+              left_margin_missionaries += 1
+          else:
+            if right_margin_canibals == 0:
+              score = 1
+              impossible = True
+            else:
+              right_margin_canibals -= 1
+              left_margin_canibals += 1
 
-
-    if score == 11 and left_margin_missionaries != 0 and left_margin_canibals != 0:
-        print("ENTREI NO -11")
-        score = -11
-    #print("SCORE " + str(score))
+      if score != 1:
+        score = validate(left_margin_canibals, left_margin_missionaries, right_margin_canibals, right_margin_missionaries, score)
     population[i].score = score
+    if score == 3 and left_margin_canibals != 0 and left_margin_missionaries != 0:
+      population[i].score = 1
+    # print(config)
+    print(left_margin_canibals, left_margin_missionaries, right_margin_canibals, right_margin_missionaries, score)
+
 
 init_population()
+
+# chromosomes = []
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('canibal')
+# cfg['people'].append('missionario')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 1
+# cfg['people'].append('missionario')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('canibal')
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 1
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('missionario')
+# cfg['people'].append('missionario')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('canibal')
+# cfg['people'].append('missionario')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('missionario')
+# cfg['people'].append('missionario')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 1
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 2
+# cfg['people'].append('canibal')
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 1
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# cfg = {
+#   'people': []
+# }
+# cfg['number_of_people'] = 1
+# cfg['people'].append('canibal')
+# cfg['people'].append('canibal')
+# chromosomes.append(Chromosome(cfg))
+# population.append(Individual(chromosomes))
+
 b = 0
 while True:
     flag = False
     score(population)
     for ind in population:
-        #print(ind)
         for ind in population:
-            if ind.score == 11:
+            if ind.score == 3:
                 print(ind)
                 print(ind.score)
                 flag = True
@@ -204,10 +239,8 @@ while True:
         break
     cruzamentoParte1()
     # for ind in newpopulation:
-    #     print(ind)
     mutacao()
     score(newpopulation)
     population = selection()
     newpopulation.clear()
-    #print("TAMANHO DA POPULACAO" + str(len(population)))
     b += 1

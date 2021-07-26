@@ -1,12 +1,14 @@
 from chromosome import Chromosome
-from random import randint
+from random import randint, seed
+from datetime import datetime
 
 persons = ['canibal', 'missionario']
+# seed(datetime.now())
 
 class Individual:
 
   def __init__(self, chromosomes = None):
-    self.score = 0
+    self.score = 1
     if chromosomes is None:
       self.chromosomes = []
       for i in range(11):
